@@ -1,0 +1,25 @@
+# {PROJECT_NAME} - Claude Guide
+
+@AGENTS.md
+
+## Skills
+
+Skills live in `.agents/skills/*/SKILL.md`.
+
+If this repository uses generated Claude skill copies, run the documented sync
+command before relying on `.claude/skills/`.
+
+## GitHub Comments
+
+Use the repository's configured AI reply prefix when posting comments from an
+AI-assisted workflow. If no prefix is configured, ask before posting.
+
+## MCP Tools
+
+If this repository has MCP configuration, follow `docs/ai-workspace.md` or the
+repository's MCP docs. Do not create, edit, or print secrets without explicit
+approval.
+
+## Tool-Specific Notes
+
+{CLAUDE_SPECIFIC_NOTES}

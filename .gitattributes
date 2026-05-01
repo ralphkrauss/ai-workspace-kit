@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+*.md text eol=lf
+*.mjs text eol=lf
+justfile text eol=lf
+assets/githooks/* text eol=lf

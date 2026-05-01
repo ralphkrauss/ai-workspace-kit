@@ -1,0 +1,36 @@
+# PR #{PR_NUMBER} Resolution Map
+
+Branch: `{BRANCH_NAME}`
+Created: {DATE}
+Total comments: {TOTAL} | To fix: {FIX_COUNT} | To defer: {DEFER_COUNT} | To decline: {DECLINE_COUNT} | To escalate: {ESCALATE_COUNT}
+Comment types: {INLINE_COUNT} review-inline | {REVIEW_BODY_COUNT} review-body | {CONVERSATION_COUNT} conversation
+
+---
+
+## Comment 1 | {status} | {severity}
+
+- **Comment Type:** review-inline | review-body | conversation
+- **File:** {path:line if applicable}
+- **Comment ID:** {id if applicable}
+- **Review ID:** {id if applicable}
+- **Thread Node ID:** {id if applicable}
+- **Author:** {author}
+- **Comment:** {full comment}
+- **Independent Assessment:** {valid | partially valid | incorrect, with reasoning}
+- **Decision:** fix-as-suggested | alternative-fix | decline | defer | escalate
+- **Approach:** {self-contained implementation instruction}
+- **Files To Change:** {paths or none}
+- **Reply Draft:**
+  > {AI_REPLY_PREFIX}: {reply text}
+
+---
+
+## Summary
+
+| # | Type | Location | Severity | Decision | Approach |
+|---|---|---|---|---|---|
+| 1 | {type} | {location} | {severity} | {decision} | {summary} |
+
+## Execution Notes
+
+- {notes added during implementation}

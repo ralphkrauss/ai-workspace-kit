@@ -1,0 +1,27 @@
+# Issue #{ISSUE_NUMBER} Resolution Map
+
+Branch: `{BRANCH_NAME}`
+Created: {DATE}
+Total comments: {TOTAL} | Action items: {ACTION_COUNT} | Questions: {QUESTION_COUNT} | Deferred: {DEFER_COUNT}
+
+---
+
+## Comment 1 | {status} | {type}
+
+- **Comment ID:** {id}
+- **Author:** {author}
+- **Comment:** {full comment}
+- **Context:** {relevant files/docs/issues}
+- **Decision:** answer | implement | defer | decline | escalate
+- **Approach:** {self-contained instruction or response}
+- **Files To Change:** {paths or none}
+- **Reply Draft:**
+  > {AI_REPLY_PREFIX}: {reply text}
+
+---
+
+## Summary
+
+| # | Author | Type | Decision | Approach |
+|---|---|---|---|---|
+| 1 | {author} | {type} | {decision} | {summary} |

@@ -1,0 +1,60 @@
+# AI Workspace
+
+This repository uses a repo-local AI workspace so coding agents share the same
+project instructions, workflows, and rules.
+
+## Canonical Files
+
+| Path | Purpose |
+|---|---|
+| `AGENTS.md` | Repository-wide instructions |
+| nested `AGENTS.md` | Directory-specific instructions |
+| `.agents/skills/` | Repeatable workflows |
+| `.agents/rules/` | Cross-cutting rules |
+| `.agents/agents/` | Reusable agent definitions |
+
+## Generated Files
+
+Some tools require generated copies under tool-specific directories such as
+`.claude/` or `.cursor/`. Edit the canonical files under `.agents/` unless a
+file explicitly says otherwise.
+
+Sync command:
+
+```text
+{AI_SYNC_COMMAND}
+```
+
+Hook commands, if installed:
+
+```text
+{AI_HOOKS_STATUS_COMMAND}
+{AI_HOOKS_ENABLE_COMMAND}
+{AI_HOOKS_DISABLE_COMMAND}
+```
+
+Enabling hooks writes repository-local git config and should be done only after
+reviewing the installed `.githooks/` files.
+
+## Safety
+
+Agents must ask before:
+
+- deleting or overwriting files
+- committing or pushing
+- modifying secrets
+- activating hooks
+- installing dependencies
+- writing to external services
+- running application servers when not explicitly allowed
+
+## Build And Test
+
+Use the repository commands documented in `AGENTS.md`.
+
+## Adding Guidance
+
+- Add reusable workflows with the `create-skill` skill.
+- Add coding or process rules with the `create-rule` skill.
+- Keep always-loaded instructions short.
+- Prefer updating existing guidance over adding duplicates.

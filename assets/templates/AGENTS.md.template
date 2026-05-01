@@ -1,0 +1,46 @@
+# {PROJECT_NAME}
+
+## Project Overview
+
+{SHORT_PROJECT_DESCRIPTION}
+
+## Build And Test
+
+Use the repository's task commands. Prefer targeted builds and tests for the
+files changed in the current task.
+
+```text
+{BUILD_COMMAND}
+{TEST_COMMAND}
+{LINT_COMMAND}
+```
+
+If a command is unknown, inspect the repository first and ask before guessing.
+
+## Working Rules
+
+- Read existing code and docs before introducing new patterns.
+- Keep changes scoped to the user's request.
+- Do not commit or push unless explicitly asked.
+- Do not delete, overwrite, reset, rebase, install packages, modify secrets, or
+  write to external services without explicit confirmation.
+- Treat uncommitted changes as user-owned unless you made them in this session.
+- Record evidence for claims that builds or tests pass.
+
+## AI Workspace
+
+- Shared skills live in `.agents/skills/`.
+- Cross-cutting rules live in `.agents/rules/`.
+- Reusable agent definitions live in `.agents/agents/`.
+- Longer AI workspace documentation lives in `docs/ai-workspace.md`.
+
+## Before Implementing
+
+1. Check relevant docs and existing examples.
+2. Identify the affected build/test commands.
+3. Load relevant rules from `.agents/rules/`.
+4. Ask if a design decision is ambiguous or risky.
+
+## Project-Specific Notes
+
+{PROJECT_SPECIFIC_NOTES}

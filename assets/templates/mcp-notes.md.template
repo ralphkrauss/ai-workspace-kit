@@ -1,0 +1,25 @@
+# MCP Notes
+
+This repository may use Model Context Protocol servers to expose local or remote
+tools to AI coding agents.
+
+## Policy
+
+- Keep secrets out of the repository.
+- Use environment variables or documented user-level secret files.
+- Prefer read-only access for shared or remote environments.
+- Add guardrails for destructive tools.
+- Document prerequisites and health checks.
+- Ask before adding or changing MCP servers.
+
+## Inventory
+
+| Server | Purpose | Access | Secret Source | Notes |
+|---|---|---|---|---|
+| `{server-name}` | `{purpose}` | read-only/read-write | `{env-var-or-file}` | `{notes}` |
+
+## Setup
+
+```text
+{MCP_SETUP_STEPS}
+```
