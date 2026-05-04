@@ -15,6 +15,11 @@ Tool-specific directories such as `.claude/` or `.cursor/` may contain
 generated projections. Edit the canonical files under `.agents/` unless a file
 explicitly says otherwise.
 
+If `.cursor/` is gitignored, run the repository sync command before relying on
+Cursor project rules. Move useful guidance from legacy `.cursorrules` or manual
+`.cursor/rules/` files into `.agents/rules/`; generated Cursor files are not
+canonical.
+
 ## Skills
 
 Each skill is a folder containing `SKILL.md`.

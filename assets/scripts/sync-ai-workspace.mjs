@@ -33,8 +33,9 @@ const __filename = fileURLToPath(import.meta.url);
 const root = dirname(dirname(__filename));
 const checkOnly = process.argv.includes("--check");
 
+const generatedMarker = "Generated from .agents/ by scripts/sync-ai-workspace.mjs";
 const generatedHeader =
-  "<!-- Generated from .agents/ by scripts/sync-ai-workspace.mjs. Do not edit directly. -->\n\n";
+  `<!-- ${generatedMarker}. Do not edit directly. -->\n\n`;
 
 function addGeneratedHeader(content) {
   const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n/);
@@ -72,6 +73,26 @@ function cleanDir(dir, predicate = () => true) {
 
 function ensureDir(path) {
   mkdirSync(path, { recursive: true });
+}
+
+function isGeneratedProjection(path) {
+  return readFileSync(path, "utf8").includes(generatedMarker);
+}
+
+function warnUnownedCursorRules(dir) {
+  if (!isDirectory(dir)) return;
+
+  const unowned = readdirSync(dir)
+    .sort()
+    .filter((entry) => entry.endsWith(".mdc"))
+    .map((entry) => join(dir, entry))
+    .filter((path) => statSync(path).isFile() && !isGeneratedProjection(path));
+
+  if (unowned.length === 0) return;
+
+  console.warn("Warning: .cursor/rules is treated as a generated projection.");
+  console.warn("Import these Cursor rules into .agents/rules before syncing if they contain useful guidance:");
+  for (const path of unowned) console.warn(`  ${relative(root, path)}`);
 }
 
 function processToolBlocks(content, targetTool) {
@@ -187,6 +208,8 @@ function syncRules(drift) {
   const claudeDest = join(root, ".claude", "rules");
   const cursorDest = join(root, ".cursor", "rules");
   if (!isDirectory(source)) return;
+
+  warnUnownedCursorRules(cursorDest);
 
   if (!checkOnly) {
     ensureDir(claudeDest);

@@ -38,8 +38,8 @@ Inspect and summarize:
 - Project type, language stack, package manager, test framework, build system,
   task runner, and CI.
 - Existing `AGENTS.md`, nested `AGENTS.md`, `CLAUDE.md`, `.agents/`,
-  `.claude/`, `.cursor/`, `.codex/`, `.opencode/`, `.github/`, MCP config,
-  hooks, task files, and docs.
+  `.claude/`, `.cursor/`, `.cursorrules`, `.codex/`, `.opencode/`,
+  `.github/`, MCP config, hooks, task files, and docs.
 - Existing build, test, lint, format, review, PR, and release commands.
 - Existing safety constraints: whether apps may be run, whether commits are
   allowed, whether tests should be targeted, and which commands are destructive.
@@ -92,13 +92,15 @@ When approved:
    default to the portable core set in `assets/MANIFEST.md` unless the user asks
    for a smaller footprint. Remove source-project assumptions and replace them
    with this repository's commands and conventions.
-6. Add sync scripts or task recipes only if the selected tools need generated
+6. Before generating tool projections, migrate useful manual Cursor guidance
+   from `.cursor/rules/` or `.cursorrules` into `.agents/rules/`.
+7. Add sync scripts or task recipes only if the selected tools need generated
    projections.
-7. Add optional hook files without activating them unless separately approved.
-8. If hook activation was separately approved, run the repository's hook
+8. Add optional hook files without activating them unless separately approved.
+9. If hook activation was separately approved, run the repository's hook
    activation command, such as `just ai-hooks-enable` or
    `node scripts/ai-hooks.mjs enable`.
-9. Add docs such as `docs/ai-workspace.md` if useful for maintainers.
+10. Add docs such as `docs/ai-workspace.md` if useful for maintainers.
 
 Migration rules:
 - Do not overwrite existing instruction files. Merge them.
@@ -106,6 +108,8 @@ Migration rules:
   appropriate layer.
 - If a conflict exists, show the conflict and ask for a decision.
 - Keep generated copies separate from canonical source files.
+- Treat `.cursor/` as generated when the repository chooses to gitignore it;
+  edit `.agents/` and regenerate Cursor projections locally.
 - Do not move secrets into the repo.
 
 Phase 5: Verify

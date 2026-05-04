@@ -95,6 +95,9 @@ scripts/ai-hooks.mjs          Optional hook activation helper
 - Keep reusable workflows in `.agents/skills/`.
 - Keep cross-cutting file-pattern guidance in `.agents/rules/`.
 - Keep long explanations in docs and link to them from instructions.
+- If the target repository has existing `.cursor/rules/` files or a
+  `.cursorrules` file, migrate useful guidance into `.agents/rules/` before
+  generating Cursor projections.
 
 ## Portable Skills
 
@@ -120,8 +123,14 @@ Generated projections, when selected:
 - Cursor: `.cursor/rules/`
 - other tools: add only when the target tool requires it
 
-Generated directories should be documented as generated. Whether they are
-committed or gitignored is a project preference the installer should ask about.
+Generated directories should be documented as generated. The default project
+model is to edit canonical files under `.agents/` and regenerate tool-specific
+directories such as `.cursor/`; when those directories are gitignored, local
+Cursor users should run the sync command before relying on Cursor rules.
+
+If Cursor cloud agents or SDK cloud mode must see generated `.cursor/` files,
+either commit the required Cursor projection files or configure the cloud setup
+to run the sync command after clone and before agent work.
 
 ## Git Hooks
 
