@@ -30,6 +30,26 @@ For the copy-paste installer prompt, see `PROMPT.md` at the repository root.
 | `setup-worktree` | Prepare branches/worktrees safely |
 | `update-context` | Refresh branch context artifacts |
 
+## Orchestration Skills
+
+These skills are for a **supervising agent** that drives worker CLI runs through
+the [`@ralphkrauss/agent-orchestrator`](https://www.npmjs.com/package/@ralphkrauss/agent-orchestrator)
+MCP server. They are optional add-ons: install them only when the target
+repository has the agent-orchestrator MCP server configured and a profiles
+manifest defining the referenced profile aliases (for example `plan-creator`,
+`plan-reviewer`, `implementation`, `code-review`, `pr-comment-triage`,
+`pr-comment-reviewer`, `pr-comment-responder`).
+
+| Skill | Purpose |
+|---|---|
+| `orchestrate-create-plan` | Supervise a plan-creator + plan-reviewer loop on a GitHub issue and push the plan |
+| `orchestrate-implement-plan` | Supervise an implementer + code-reviewer loop against an approved plan |
+| `orchestrate-resolve-pr-comments` | Supervise PR-comment triage, resolution-map review, implementation, code review, push, and GitHub replies |
+
+Orchestration skills reference the matching repository workflow skills
+(`create-plan`, `implement-plan`, `resolve-pr-comments`) so install those first
+when adopting the supervisor flow.
+
 ## Shared Agents
 
 | Agent | Purpose |

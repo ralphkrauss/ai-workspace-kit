@@ -41,6 +41,7 @@ These are portable, but depend on tools, vendors, or repo conventions:
 | `create-design` / `implement-design` / `review-design-implementation` | Useful for UI repos, too heavy for non-UI repos |
 | `build-wiki` / `ingest-wiki` / `query-wiki` | Useful for documentation-heavy repos |
 | `create-plan-execution-package` | Useful when teams delegate to multiple agents |
+| `orchestrate-create-plan` / `orchestrate-implement-plan` / `orchestrate-resolve-pr-comments` | Requires the `@ralphkrauss/agent-orchestrator` MCP server and a profiles manifest with the referenced profile aliases |
 
 ## Keep Project-Specific
 

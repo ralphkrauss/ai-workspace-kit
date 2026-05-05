@@ -97,6 +97,9 @@ write files until you approve the installation plan.
 - `update-context`
 - `create-agent`
 - `create-mcp`
+- `orchestrate-create-plan` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
+- `orchestrate-implement-plan` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
+- `orchestrate-resolve-pr-comments` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
 - Generic `AGENTS.md` template
 - Generic shared agents: `researcher`, `implementer`, `reviewer`
 - Generic sync script for rules, skills, and agents

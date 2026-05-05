@@ -40,6 +40,12 @@ Inspect and summarize:
 - Existing `AGENTS.md`, nested `AGENTS.md`, `CLAUDE.md`, `.agents/`,
   `.claude/`, `.cursor/`, `.cursorrules`, `.codex/`, `.opencode/`,
   `.github/`, MCP config, hooks, task files, and docs.
+- Whether any MCP config (`.mcp.json`, `.codex/config.toml`,
+  `.cursor/mcp.json`, `opencode.json`, etc.) references
+  `@ralphkrauss/agent-orchestrator`, and whether a profiles manifest exists for
+  it (such as a `profiles.json` or path under `AGENT_ORCHESTRATOR_HOME`).
+  Record which profile aliases are defined; do not print credentials or
+  resolved tokens.
 - Existing build, test, lint, format, review, PR, and release commands.
 - Existing safety constraints: whether apps may be run, whether commits are
   allowed, whether tests should be targeted, and which commands are destructive.
@@ -78,6 +84,14 @@ Common preference questions:
 - Should generated tool-specific directories be committed or gitignored?
 - What rigor level should the project use: lightweight, standard, regulated,
   or custom?
+- Should orchestration skills (`orchestrate-create-plan`,
+  `orchestrate-implement-plan`, `orchestrate-resolve-pr-comments`) be
+  installed? These require the `@ralphkrauss/agent-orchestrator` MCP server
+  and a profiles manifest defining the referenced profile aliases
+  (`plan-creator`, `plan-reviewer`, `implementation`, `code-review`,
+  `pr-comment-triage`, `pr-comment-reviewer`, `pr-comment-responder`).
+  Default to skip unless the inventory shows agent-orchestrator is already
+  configured or the user opts in.
 
 Wait for user approval before writing files.
 
@@ -91,7 +105,13 @@ When approved:
 5. Adapt selected shared skills from the kit. For standard/full installs,
    default to the portable core set in `assets/MANIFEST.md` unless the user asks
    for a smaller footprint. Remove source-project assumptions and replace them
-   with this repository's commands and conventions.
+   with this repository's commands and conventions. Install orchestration
+   skills (the `orchestrate-*` set in `assets/MANIFEST.md`) only when the user
+   opted in. Copy them verbatim — they reference profile aliases, not models.
+   Do not invent profile aliases or hard-code provider/model/effort settings;
+   if the profiles manifest is missing or incomplete, list the required
+   aliases in the install report and let the user configure them through the
+   agent-orchestrator MCP tools.
 6. Before generating tool projections, migrate useful manual Cursor guidance
    from `.cursor/rules/` or `.cursorrules` into `.agents/rules/`.
 7. Add sync scripts or task recipes only if the selected tools need generated
