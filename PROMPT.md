@@ -16,6 +16,8 @@ Follow the installer protocol exactly:
   secret changes
 - adapt shared skills and templates to this repository's actual commands and
   conventions
+- keep generated tool projections inside this repository; do not write them to
+  user-level `.claude`, `.codex`, or `.cursor` directories
 - leave changes uncommitted
 ```
 

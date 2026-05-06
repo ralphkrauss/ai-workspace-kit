@@ -32,6 +32,8 @@ If a command is unknown, inspect the repository first and ask before guessing.
 - Shared skills live in `.agents/skills/`.
 - Cross-cutting rules live in `.agents/rules/`.
 - Reusable agent definitions live in `.agents/agents/`.
+- Sync scripts MUST NOT write outside the worktree. Do not generate user-level
+  `.claude/`, `.codex/`, `.cursor/`, MCP config, hooks, or settings files.
 - Longer AI workspace documentation lives in `docs/ai-workspace.md`.
 
 ## Before Implementing

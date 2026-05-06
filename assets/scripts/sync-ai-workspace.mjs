@@ -6,7 +6,7 @@
 //   .agents/rules/{name}.md
 //   .agents/agents/{name}.md
 //
-// Generated projections:
+// Generated projections under this worktree:
 //   .claude/skills/
 //   .claude/rules/
 //   .claude/agents/
@@ -26,11 +26,12 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, join, parse, relative } from "node:path";
+import { dirname, extname, isAbsolute, join, parse, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const root = dirname(dirname(__filename));
+const resolvedRoot = resolve(root);
 const checkOnly = process.argv.includes("--check");
 
 const generatedMarker = "Generated from .agents/ by scripts/sync-ai-workspace.mjs";
@@ -45,6 +46,17 @@ function addGeneratedHeader(content) {
 
 function isDirectory(path) {
   return existsSync(path) && statSync(path).isDirectory();
+}
+
+function workspacePath(...segments) {
+  return join(root, ...segments);
+}
+
+function assertWorktreePath(path, operation) {
+  const resolvedPath = resolve(path);
+  const rel = relative(resolvedRoot, resolvedPath);
+  if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) return;
+  throw new Error(`Refusing to ${operation} outside worktree: ${path}`);
 }
 
 function collectFiles(dir, base = dir) {
@@ -63,15 +75,18 @@ function collectFiles(dir, base = dir) {
 
 function cleanDir(dir, predicate = () => true) {
   if (!existsSync(dir)) return;
+  assertWorktreePath(dir, "clean");
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (predicate(entry, full)) {
+      assertWorktreePath(full, "remove");
       rmSync(full, { recursive: true, force: true });
     }
   }
 }
 
 function ensureDir(path) {
+  assertWorktreePath(path, "create directory");
   mkdirSync(path, { recursive: true });
 }
 
@@ -152,6 +167,7 @@ function readMaybe(path) {
 }
 
 function writeOrCheck(path, content, drift) {
+  assertWorktreePath(path, checkOnly ? "check" : "write");
   if (checkOnly) {
     if (readMaybe(path) !== content) {
       drift.push(path);
@@ -163,6 +179,7 @@ function writeOrCheck(path, content, drift) {
 }
 
 function copyOrCheck(src, dest, drift) {
+  assertWorktreePath(dest, checkOnly ? "check" : "copy");
   if (checkOnly) {
     if (!existsSync(dest)) {
       drift.push(dest);
@@ -178,8 +195,8 @@ function copyOrCheck(src, dest, drift) {
 }
 
 function syncSkills(drift) {
-  const source = join(root, ".agents", "skills");
-  const dest = join(root, ".claude", "skills");
+  const source = workspacePath(".agents", "skills");
+  const dest = workspacePath(".claude", "skills");
   if (!isDirectory(source)) return;
 
   if (!checkOnly) {
@@ -204,9 +221,9 @@ function syncSkills(drift) {
 }
 
 function syncRules(drift) {
-  const source = join(root, ".agents", "rules");
-  const claudeDest = join(root, ".claude", "rules");
-  const cursorDest = join(root, ".cursor", "rules");
+  const source = workspacePath(".agents", "rules");
+  const claudeDest = workspacePath(".claude", "rules");
+  const cursorDest = workspacePath(".cursor", "rules");
   if (!isDirectory(source)) return;
 
   warnUnownedCursorRules(cursorDest);
@@ -227,8 +244,8 @@ function syncRules(drift) {
 }
 
 function syncAgents(drift) {
-  const source = join(root, ".agents", "agents");
-  const dest = join(root, ".claude", "agents");
+  const source = workspacePath(".agents", "agents");
+  const dest = workspacePath(".claude", "agents");
   if (!isDirectory(source)) return;
 
   if (!checkOnly) {

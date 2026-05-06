@@ -86,6 +86,11 @@ scripts/ai-hooks.mjs          Optional hook activation helper
 .githooks/post-merge          Optional sync hook
 ```
 
+Generated tool projections must be worktree-scoped. Do not write generated
+skills, commands, agents, rules, MCP config, hooks, settings, or other
+installer output into user-level tool directories such as `~/.claude/`,
+`~/.codex/`, or `~/.cursor/`.
+
 ## Adaptation Rules
 
 - Replace generic placeholders with the repository's actual commands.
@@ -127,6 +132,8 @@ Generated directories should be documented as generated. The default project
 model is to edit canonical files under `.agents/` and regenerate tool-specific
 directories such as `.cursor/`; when those directories are gitignored, local
 Cursor users should run the sync command before relying on Cursor rules.
+These destinations are repository-relative paths in the target worktree, never
+user-level paths under a home directory.
 
 If Cursor cloud agents or SDK cloud mode must see generated `.cursor/` files,
 either commit the required Cursor projection files or configure the cloud setup

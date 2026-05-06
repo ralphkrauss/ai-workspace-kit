@@ -19,6 +19,11 @@ Some tools require generated copies under tool-specific directories such as
 `.claude/` or `.cursor/`. Edit the canonical files under `.agents/` unless a
 file explicitly says otherwise.
 
+Generated tool projections must stay inside this repository's worktree. Sync
+scripts must not write generated skills, commands, agents, rules, MCP config,
+hooks, settings, or other files into user-level `.claude/`, `.codex/`, or
+`.cursor/` directories.
+
 Cursor rules are generated from `.agents/rules/` into `.cursor/rules/`. If
 `.cursor/` is gitignored, run the sync command locally before relying on Cursor
 project rules. Do not hand-edit generated Cursor rules; move useful guidance

@@ -71,6 +71,19 @@ function isProbablyBinary(buffer) {
 
 const findings = [];
 
+const syncScriptForbiddenReferences = [
+  { name: "os.homedir", pattern: /\bos\.homedir\s*\(/ },
+  { name: "os.userInfo", pattern: /\bos\.userInfo\s*\(/ },
+  { name: "homedir()", pattern: /\bhomedir\s*\(/ },
+  { name: "process.env.HOME", pattern: /process\.env\.HOME\b/ },
+  { name: "process.env.USERPROFILE", pattern: /process\.env\.USERPROFILE\b/ },
+  { name: "process.env.XDG_CONFIG_HOME", pattern: /process\.env\.XDG_CONFIG_HOME\b/ },
+  { name: "process.env.APPDATA", pattern: /process\.env\.APPDATA\b/ },
+  { name: "process.env.LOCALAPPDATA", pattern: /process\.env\.LOCALAPPDATA\b/ },
+  { name: "tilde path literal", pattern: /(["'`])~/ },
+  { name: "expanduser", pattern: /\bexpanduser\b/ },
+];
+
 for (const file of walk(root)) {
   const buffer = readFileSync(file);
   if (isProbablyBinary(buffer)) continue;
@@ -83,6 +96,21 @@ for (const file of walk(root)) {
       if (check.pattern.test(line)) {
         findings.push({ file: rel, line: index + 1, check: check.name });
       }
+    }
+  }
+}
+
+const syncScriptPath = join(root, "assets", "scripts", "sync-ai-workspace.mjs");
+if (existsSync(syncScriptPath)) {
+  const rel = relative(root, syncScriptPath);
+  const content = readFileSync(syncScriptPath, "utf8");
+  for (const forbidden of syncScriptForbiddenReferences) {
+    if (forbidden.pattern.test(content)) {
+      findings.push({
+        file: rel,
+        line: 1,
+        check: `sync script must not reference ${forbidden.name}`,
+      });
     }
   }
 }

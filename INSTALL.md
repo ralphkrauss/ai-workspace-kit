@@ -22,6 +22,10 @@ Core requirements:
 - Keep project-specific instructions in the target repository.
 - Keep reusable workflow guidance generic and tool-agnostic unless a file is
   explicitly tool-specific.
+- Keep generated tool projections worktree-scoped. Do not write generated
+  skills, commands, agents, rules, MCP config, hooks, settings, or installer
+  output into user-level tool directories such as `~/.claude/`, `~/.codex/`, or
+  `~/.cursor/`.
 
 Phase 1: Read the Kit
 1. Read `{PATH_TO_AI_WORKSPACE_KIT}/README.md`.
@@ -75,7 +79,7 @@ Common preference questions:
 - Which AI tools should be supported: Codex, Claude, Cursor, OpenCode,
   Copilot, other?
 - Should shared skills be copied into the repo, referenced externally, or
-  installed as a tool-specific plugin where supported?
+  installed as a repository-local tool-specific plugin where supported?
 - Should git hooks be added only as files, or should `core.hooksPath` also be
   activated?
 - Should MCP config be skipped, scaffolded with placeholders, or migrated from
@@ -115,7 +119,9 @@ When approved:
 6. Before generating tool projections, migrate useful manual Cursor guidance
    from `.cursor/rules/` or `.cursorrules` into `.agents/rules/`.
 7. Add sync scripts or task recipes only if the selected tools need generated
-   projections.
+   projections. The sync script must write only under the target worktree, such
+   as `.claude/skills/` or `.cursor/rules/`, and must not write to user-level
+   tool directories.
 8. Add optional hook files without activating them unless separately approved.
 9. If hook activation was separately approved, run the repository's hook
    activation command, such as `just ai-hooks-enable` or

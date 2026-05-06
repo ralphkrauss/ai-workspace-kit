@@ -67,6 +67,9 @@ write files until you approve the installation plan.
   source material the agent adapts to the repository.
 - **Repository-local by default.** Instructions, skills, rules, and agents live
   in the target repo so collaborators and future agents share the same context.
+  Generated tool projections must also stay inside the target worktree, such as
+  `.claude/skills/` or `.cursor/rules/`; the kit is not a user-level
+  `~/.claude`, `~/.codex`, or `~/.cursor` installer.
 - **Generic core, local specialization.** Shared skills must avoid
   project-specific command names, paths, domain terms, and infrastructure names.
 - **Merge over replace.** Existing `AGENTS.md`, `.agents/`, `.claude/`,
