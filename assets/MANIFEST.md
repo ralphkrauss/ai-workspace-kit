@@ -27,6 +27,7 @@ For the copy-paste installer prompt, see `PROMPT.md` at the repository root.
 | `review` | Review uncommitted changes |
 | `review-pr` | Review full branch diff |
 | `run-test-plan` | Execute manual test runbooks |
+| `shape-issue` | Refine rough requests into specific issue requirements |
 | `setup-worktree` | Prepare branches/worktrees safely |
 | `update-context` | Refresh branch context artifacts |
 

@@ -29,6 +29,7 @@ commands with target-repository discovery:
 | `create-rule` | Generic instruction/rule capture |
 | `create-agent` | Generic agent definition capture |
 | `create-mcp` | Generic MCP config workflow |
+| `shape-issue` | Generic requirements shaping before issue creation or planning |
 
 ## Good Optional Add-Ons
 
