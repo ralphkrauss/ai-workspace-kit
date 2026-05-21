@@ -1,0 +1,45 @@
+{
+  "name": "orchestrate-resolve-pr-comments",
+  "description": "PR comment and CI/check resolution loop: triage comments and failing checks, review the resolution map, implement, review, push, and reply after approval.",
+  "orchestrator_profile": "workflow-orchestrator",
+  "reviewer_profile": "workflow-reviewer",
+  "reviewer_required_for": [
+    "spawn_worker",
+    "send_followup_to_worker",
+    "ask_human",
+    "mark_complete",
+    "mark_failed"
+  ],
+  "max_review_iterations": 3,
+  "review_escalation": "ask_human",
+  "triggers": [
+    {
+      "kind": "initial_invocation"
+    },
+    {
+      "kind": "any_worker_finished"
+    },
+    {
+      "kind": "worker_error"
+    },
+    {
+      "kind": "human_replied"
+    }
+  ],
+  "idle_seconds": 900,
+  "compaction": {
+    "max_actions_between": 30
+  },
+  "state_packet": {
+    "recent_events_limit": 35,
+    "worker_summary_chars_max": 4000,
+    "action_history_window": 30,
+    "include_pending_inputs": true,
+    "include_children": true
+  },
+  "role_prompts": {
+    "orchestrator": "You orchestrate the target repository workflow `orchestrate-resolve-pr-comments`. Read `.agents/skills/orchestrate-resolve-pr-comments/SKILL.md` in the target cwd and follow it as policy. You are a supervisor only: do not edit files directly, do not commit, do not push, and do not post GitHub replies yourself. Use `pr-comment-triage` to fetch PR comments and CI/check status, then create/update `resolution-map.md`, `pr-comment-reviewer` to review it, then present Ralph the required business-intent go/no-go summary before implementation. After approval use `implementation`, then `code-review`, then explicit commit/push approval, then `generalist` for follow-up issues when required, then explicit approval before `pr-comment-responder` posts replies/resolves threads.",
+    "reviewer": "You review proposed orchestration actions for the target repository `orchestrate-resolve-pr-comments` workflow. Approve only if actions follow the target cwd `.agents/skills/orchestrate-resolve-pr-comments/SKILL.md`: resolution map includes PR comments and failing CI/checks before implementation, mandatory Ralph go/no-go checkpoint before code fixes, no supervisor file/GitHub side effects, commit/push and replies require explicit approval, deferred/out-of-scope items get follow-up issues, and behavior/scope/public-contract/tool-surface changes are Open Human Decisions unless pre-approved by human-authored comments or repository rules."
+  },
+  "max_nesting_depth": 1
+}

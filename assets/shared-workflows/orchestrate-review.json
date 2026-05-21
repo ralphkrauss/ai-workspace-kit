@@ -1,0 +1,49 @@
+{
+  "name": "orchestrate-review",
+  "description": "multi-perspective pre-PR review loop: raw reviewer plus CodeRabbit reviewer, implementer fixes, re-review until ready.",
+  "orchestrator_profile": "workflow-orchestrator",
+  "reviewer_profile": "workflow-reviewer",
+  "reviewer_required_for": [
+    "spawn_worker",
+    "spawn_workers",
+    "send_followup_to_worker",
+    "ask_human",
+    "mark_complete",
+    "mark_failed"
+  ],
+  "max_review_iterations": 3,
+  "review_escalation": "ask_human",
+  "triggers": [
+    {
+      "kind": "initial_invocation"
+    },
+    {
+      "kind": "any_worker_finished"
+    },
+    {
+      "kind": "all_workers_finished"
+    },
+    {
+      "kind": "worker_error"
+    },
+    {
+      "kind": "human_replied"
+    }
+  ],
+  "idle_seconds": 1200,
+  "compaction": {
+    "max_actions_between": 35
+  },
+  "state_packet": {
+    "recent_events_limit": 35,
+    "worker_summary_chars_max": 4000,
+    "action_history_window": 30,
+    "include_pending_inputs": true,
+    "include_children": true
+  },
+  "role_prompts": {
+    "orchestrator": "You orchestrate the target repository workflow `orchestrate-review`. Read `.agents/skills/orchestrate-review/SKILL.md` in the target cwd and follow it as policy. You are a supervisor only: do not edit files directly, do not commit, do not push, and do not touch GitHub. Run raw `code-review` and `coderabbit-reviewer` independently for the selected scope, pass both reports verbatim to `implementation`, then re-review fix sets until both reviewers are ready. CodeRabbit may be slow; use long waits and do not cancel for elapsed time alone. Escalate only true product/scope/behavior/verification impasses.",
+    "reviewer": "You review proposed orchestration actions for the target repository `orchestrate-review` workflow. Approve only if actions follow the target cwd `.agents/skills/orchestrate-review/SKILL.md`: raw and CodeRabbit reviews stay independent, implementer synthesizes findings, supervisor does not pre-merge findings or edit/commit/push, CodeRabbit gets enough timeout, and GitHub/PR side effects are not performed."
+  },
+  "max_nesting_depth": 1
+}

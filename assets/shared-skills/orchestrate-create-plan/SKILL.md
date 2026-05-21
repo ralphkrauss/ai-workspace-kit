@@ -1,6 +1,6 @@
 ---
 name: orchestrate-create-plan
-description: Orchestrate an issue-based planning loop between a plan creator using the repository create-plan workflow and a reviewer who answers most clarification questions and critiques the plan until both are aligned.
+description: Orchestrate an issue-based planning loop with plan creator and reviewer workers through agent-orchestrator. Use when user says "orchestrate create plan", "agent plan loop", or wants worker-assisted plan creation.
 ---
 
 # Orchestrate Create Plan
@@ -9,6 +9,9 @@ Coordinate a plan-creation loop for a GitHub issue. The plan creator owns the
 plan and should use the repository create-plan skill or workflow when available;
 the reviewer studies the issue, answers most clarification questions, and
 critiques drafts until the plan is complete.
+
+Read your repository's agent-orchestrator setup docs (MCP server config,
+profiles manifest, package diagnostics) before starting.
 
 ## Route And Profile Selection
 
@@ -44,6 +47,31 @@ Do not let reviewer/creator agreement, security hardening, simplification, or
 ask whether the desired behavior can be preserved with a safer implementation.
 If preserving it may be impossible or materially changes tradeoffs, ask the
 human with concrete options.
+
+## Reviewer Prompt Anti-Patterns
+
+Reviewer workers are capable agents with access to the repository's planning
+skills and rules. The supervisor's reviewer prompt should be a slim handoff:
+artifact paths, upstream worker output when useful, the issue or scope to
+review, and the relevant repository workflow to use.
+
+Avoid these reviewer-prompt failure modes:
+
+- **Plan-compliance-only framing:** do not ask only whether the draft matches
+  what the plan creator said. Ask for an independent plan review with the issue
+  and repository context available.
+- **Dimension lists:** do not recreate the planning/review rubric in the prompt.
+  Point to the repository create-plan workflow and project rules instead.
+- **Hint laundering:** do not summarize plan-creator claims as facts. Pass the
+  creator output verbatim when it matters.
+- **Positive framing:** do not state intended plan properties as something to
+  confirm. Let the reviewer derive gaps and decisions from the issue, draft, and
+  repository rules.
+
+If the supervisor notices a genuinely task-specific concern that is not already
+in the issue, plan draft, upstream worker output, or repository rules, surface it
+to the human as an **Open Human Decision**. Do not smuggle it into the reviewer
+prompt as a checklist item.
 
 ## Workflow
 
@@ -89,21 +117,14 @@ human with concrete options.
     - clearly separate confirmed decisions, assumptions, Reviewer Questions,
       Open Human Decisions, risks, and implementation tasks, using `none` for
       empty sections.
-4. **Start the reviewer.** Ask the reviewer to get familiar with the same issue,
-    repository context, and current plan draft. Instruct it to:
-    - answer the plan creator's Reviewer Questions when confidence is high based
-      on the issue, repository context, existing patterns, and project rules;
-    - flag when a question depends on product intent or requirements that cannot
-      be inferred from the issue or codebase;
-    - flag any proposed scope substitution, such as replacing the user's named
-      technology, API, SDK, product surface, or acceptance target with a different
-      implementation surface;
-    - flag any proposed permission/tool-surface, workflow, public-contract, or
-      user-facing behavior change that is not explicitly approved by the issue,
-      plan, or human;
-    - review the plan for unclear, underspecified, incorrect, risky, or missing
-      content;
-    - provide concise, actionable feedback for the plan creator.
+4. **Start the reviewer.** Give the reviewer the issue, current plan draft path,
+    plan creator output, current branch, and repository instructions. Ask it to
+    independently review the draft using the repository create-plan workflow and
+    project rules as context. It should answer Reviewer Questions it can answer
+    from the issue and repository context, identify blocking plan defects or true
+    Open Human Decisions, provide concise feedback for the plan creator, and say
+    whether the plan is ready. Do not add a supervisor-authored checklist or
+    summary of plan-creator claims.
 5. **Bridge questions without defaulting to the human.** When the plan creator
     records Reviewer Questions, send them to the reviewer first. The reviewer
     should answer or resolve every question it can, then identify only the
@@ -151,14 +172,12 @@ human with concrete options.
 
 Use short, role-specific follow-ups during the loop:
 
-- To the reviewer: "Review the updated plan for the issue. Answer any open
-  Reviewer Questions you can answer confidently from the issue, repository
-  context, existing patterns, and project rules. Do not send reviewer-answerable
-  questions to the human. Promote only true product/scope, behavior,
-  acceptance-criteria, policy, permission/tool-surface, public-contract,
-  release/publish, or material scope-substitution decisions to Open Human
-  Decisions, with concrete options and consequences. Identify only blocking or
-  materially useful feedback. Say when the plan is ready."
+- To the reviewer: "Review the updated plan for the issue using the repository
+  create-plan workflow and project rules as context. Inputs: issue, plan draft
+  path, and plan creator output. Treat creator output as claims, not facts.
+  Answer Reviewer Questions you can answer from the issue and repository
+  context. Report blocking plan defects, true Open Human Decisions, materially
+  useful feedback, and whether the plan is ready."
 - To the plan creator: "Incorporate the reviewer feedback, update the plan, and
   list any remaining Reviewer Questions and Open Human Decisions. Do not ask the
   human directly. Only keep questions open when they materially affect

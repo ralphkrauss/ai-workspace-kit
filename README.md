@@ -33,6 +33,7 @@ INSTALL.md                         Prompt to paste into an AI coding agent
 docs/                              Installer policy and design docs
 profiles/                          Stack-specific guidance for adaptation
 assets/shared-skills/              Generic skills to adapt into target repos
+assets/shared-workflows/           Agent Orchestrator workflow JSON assets
 assets/templates/                  Starter files the installer can merge
 assets/scripts/                    Optional sync scripts for generated tool dirs
 assets/githooks/                   Optional hook files
@@ -103,7 +104,10 @@ write files until you approve the installation plan.
 - `create-mcp`
 - `orchestrate-create-plan` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
 - `orchestrate-implement-plan` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
+- `orchestrate-create-test-plan` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
+- `orchestrate-review` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
 - `orchestrate-resolve-pr-comments` (optional; requires the `@ralphkrauss/agent-orchestrator` MCP server)
+- Matching workflow JSON assets under `assets/shared-workflows/`
 - Generic `AGENTS.md` template
 - Generic shared agents: `researcher`, `implementer`, `reviewer`
 - Generic sync script for rules, skills, and agents
@@ -115,6 +119,7 @@ This repository intentionally contains source material, not generated output.
 When improving the kit:
 
 - Keep shared skills under `assets/shared-skills/`.
+- Keep shared Agent Orchestrator workflow JSON under `assets/shared-workflows/`.
 - Keep examples generic.
 - Run `just check-public` before publishing changes.
 - For local/private source terms, run

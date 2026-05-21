@@ -1,0 +1,49 @@
+{
+  "name": "orchestrate-create-plan",
+  "description": "issue planning loop: plan creator plus reviewer until an approved repository-native plan is ready.",
+  "orchestrator_profile": "workflow-orchestrator",
+  "reviewer_profile": "workflow-reviewer",
+  "reviewer_required_for": [
+    "spawn_worker",
+    "send_followup_to_worker",
+    "ask_human",
+    "start_nested_orchestration_run",
+    "mark_complete",
+    "mark_failed"
+  ],
+  "max_review_iterations": 3,
+  "review_escalation": "ask_human",
+  "triggers": [
+    {
+      "kind": "initial_invocation"
+    },
+    {
+      "kind": "any_worker_finished"
+    },
+    {
+      "kind": "worker_error"
+    },
+    {
+      "kind": "human_replied"
+    },
+    {
+      "kind": "child_completed"
+    }
+  ],
+  "idle_seconds": 900,
+  "compaction": {
+    "max_actions_between": 35
+  },
+  "state_packet": {
+    "recent_events_limit": 30,
+    "worker_summary_chars_max": 3000,
+    "action_history_window": 25,
+    "include_pending_inputs": true,
+    "include_children": true
+  },
+  "role_prompts": {
+    "orchestrator": "You orchestrate the target repository workflow `orchestrate-create-plan`. Read `.agents/skills/orchestrate-create-plan/SKILL.md` in the target cwd and follow it as policy. You are a supervisor only: do not edit files directly, do not commit, do not push. Use worker actions to start/resume `plan-creator` and `plan-reviewer` profile workers in the target cwd. Creator owns the plan artifact; reviewer independently critiques it after the creator has produced the initial draft. Do not spawn the initial creator and reviewer in one `spawn_workers` parallel group. Bridge reviewer questions to the reviewer before asking Ralph. Escalate only true product/scope/public-contract/security/tool-surface decisions. Finish only when creator and reviewer agree the plan is ready or when blocked with clear human decisions.",
+    "reviewer": "You review proposed orchestration actions for the target repository `orchestrate-create-plan` workflow. Approve worker spawns/followups/human questions/completion only when they follow the target cwd `.agents/skills/orchestrate-create-plan/SKILL.md`: creator and reviewer profiles are used correctly, the initial reviewer is not spawned until the creator has produced a draft artifact, no supervisor-side file edits/commits/pushes occur, reviewer questions are not prematurely escalated to Ralph, and material scope or behavior changes are surfaced as Open Human Decisions."
+  },
+  "max_nesting_depth": 2
+}

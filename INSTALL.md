@@ -42,8 +42,8 @@ Inspect and summarize:
 - Project type, language stack, package manager, test framework, build system,
   task runner, and CI.
 - Existing `AGENTS.md`, nested `AGENTS.md`, `CLAUDE.md`, `.agents/`,
-  `.claude/`, `.cursor/`, `.cursorrules`, `.codex/`, `.opencode/`,
-  `.github/`, MCP config, hooks, task files, and docs.
+  `.agent-orchestrator/workflows/`, `.claude/`, `.cursor/`, `.cursorrules`,
+  `.codex/`, `.opencode/`, `.github/`, MCP config, hooks, task files, and docs.
 - Whether any MCP config (`.mcp.json`, `.codex/config.toml`,
   `.cursor/mcp.json`, `opencode.json`, etc.) references
   `@ralphkrauss/agent-orchestrator`, and whether a profiles manifest exists for
@@ -89,9 +89,11 @@ Common preference questions:
 - What rigor level should the project use: lightweight, standard, regulated,
   or custom?
 - Should orchestration skills (`orchestrate-create-plan`,
-  `orchestrate-implement-plan`, `orchestrate-resolve-pr-comments`) be
-  installed? These require the `@ralphkrauss/agent-orchestrator` MCP server
-  and a profiles manifest defining the referenced profile aliases
+  `orchestrate-create-test-plan`, `orchestrate-implement-plan`,
+  `orchestrate-review`, `orchestrate-resolve-pr-comments`) and their matching
+  workflow JSON files be installed? These require the
+  `@ralphkrauss/agent-orchestrator` MCP server and a profiles manifest defining
+  the referenced profile aliases
   (`plan-creator`, `plan-reviewer`, `implementation`, `code-review`,
   `pr-comment-triage`, `pr-comment-reviewer`, `pr-comment-responder`).
   Default to skip unless the inventory shows agent-orchestrator is already
@@ -116,17 +118,23 @@ When approved:
    if the profiles manifest is missing or incomplete, list the required
    aliases in the install report and let the user configure them through the
    agent-orchestrator MCP tools.
-6. Before generating tool projections, migrate useful manual Cursor guidance
+6. If orchestration workflows are selected, adapt the matching JSON files from
+   `assets/shared-workflows/` into `.agent-orchestrator/workflows/` unless the
+   user explicitly asks for user-level defaults under
+   `~/.config/agent-orchestrator/workflows/`. Keep workflow prompts generic:
+   refer to the target cwd and repo-local `.agents/skills/<name>/SKILL.md`, not
+   to source-kit or source-project absolute paths.
+7. Before generating tool projections, migrate useful manual Cursor guidance
    from `.cursor/rules/` or `.cursorrules` into `.agents/rules/`.
-7. Add sync scripts or task recipes only if the selected tools need generated
+8. Add sync scripts or task recipes only if the selected tools need generated
    projections. The sync script must write only under the target worktree, such
    as `.claude/skills/` or `.cursor/rules/`, and must not write to user-level
    tool directories.
-8. Add optional hook files without activating them unless separately approved.
-9. If hook activation was separately approved, run the repository's hook
+9. Add optional hook files without activating them unless separately approved.
+10. If hook activation was separately approved, run the repository's hook
    activation command, such as `just ai-hooks-enable` or
    `node scripts/ai-hooks.mjs enable`.
-10. Add docs such as `docs/ai-workspace.md` if useful for maintainers.
+11. Add docs such as `docs/ai-workspace.md` if useful for maintainers.
 
 Migration rules:
 - Do not overwrite existing instruction files. Merge them.
@@ -143,6 +151,9 @@ Run non-destructive checks only:
 - Show the created/modified file list.
 - Search generated files for source-kit placeholders and source-project terms.
 - Validate skill frontmatter where possible.
+- Validate selected Agent Orchestrator workflow JSON with
+  `agent-orchestrator orchestrate workflows list --workflows-file <path> --json`
+  when the CLI is available.
 - Validate that referenced commands exist or are documented as placeholders.
 - If a sync script was added, run it only if it does not overwrite unreviewed
   existing files; otherwise ask first.

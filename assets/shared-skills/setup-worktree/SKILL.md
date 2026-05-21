@@ -1,74 +1,104 @@
 ---
 name: setup-worktree
-description: Set up or switch to a branch/worktree safely. Use when the user says "setup worktree", "checkout branch", "start feature", or provides an issue or branch name to begin work.
+description: Set up a git worktree for a feature branch in a new web session. Use when user says "setup worktree", "checkout branch", "start feature", or provides a branch name or issue number at the start of a session.
 ---
 
 # Setup Worktree
 
-Prepare a branch or worktree without overwriting local changes.
+Configure the current session to work on a specific feature branch. Designed for web-initiated sessions via `claude remote-control --spawn worktree`, but works in any context.
 
 ## Instructions
 
-### Step 1: Inspect Current State
+### Step 1: Parse the Input
 
-Run:
+The argument is passed after the skill invocation (e.g., `/setup-worktree 155` or `/setup-worktree 155-my-feature`).
 
-```text
-git status --short
-git branch --show-current
-git remote -v
-git worktree list
+- **Digits only** (e.g., `155`) → treat as a GitHub issue number
+- **String with hyphens** (e.g., `155-my-feature`) → treat as a full branch name
+- **No argument** → ask the user for an issue number or branch name
+
+### Step 2: Fetch Latest
+
+```bash
+git fetch origin --prune
 ```
 
-If there are uncommitted changes, ask before switching branches or creating a
-new worktree.
+### Step 3: Resolve the Branch
 
-### Step 2: Resolve Target
+**If input is a GitHub issue number:**
 
-Determine whether the input is:
+1. Search for an existing branch matching the pattern `{number}-*`:
 
-- issue number
-- branch name
-- feature slug
-- PR branch
+   ```bash
+   # Check remote
+   git branch -r --list "origin/{number}-*"
+   # Check local
+   git branch --list "{number}-*"
+   ```
 
-If an issue number is provided, fetch issue details when available and derive a
-branch name using repository conventions.
+2. **If a matching branch is found** → use it (prefer remote if local doesn't exist yet).
 
-### Step 3: Check Existing Branches And Worktrees
+3. **If no matching branch exists** → create one:
+   - Fetch the issue details using the available GitHub tools (owner, repo, issue_number). Extract the `title` from the result.
+   - Slugify: lowercase, replace spaces and special characters with hyphens, remove consecutive hyphens, trim trailing hyphens, truncate to reasonable length
+   - Branch name: `{number}-{slug}` (e.g., `155-add-user-dashboard`)
+   - Create from main:
+     ```bash
+     git checkout -b {branch} origin/main
+     ```
+   - Do NOT push automatically. Tell the user: "Branch `{branch}` created locally. Push with `git push -u origin {branch}` when ready."
 
-Check local and remote branches. If the branch is already checked out in another
-worktree, stop and ask how to proceed.
+**If input is a full branch name:**
 
-### Step 4: Create Or Checkout
+1. Check if it exists remotely or locally.
+2. **If found** → proceed to checkout.
+3. **If not found** → show similar branches and stop:
+   ```bash
+   git branch -r --list "origin/*{partial}*" | head -10
+   ```
 
-Use the repository's branch naming and base branch conventions.
+### Step 4: Check for Worktree Conflicts
 
-Do not push a new branch automatically unless the user asks.
+Before checking out, verify the branch isn't already active in another worktree:
 
-### Step 5: Report
+```bash
+git worktree list --porcelain
+```
 
-Report:
+Look for `branch refs/heads/{branch}` in the output.
 
-- working directory
-- branch
-- latest commit
-- upstream status
-- existing plan/context files
-- next recommended command
+**If the branch is checked out in another worktree** → stop and tell the user:
+> "Branch `{branch}` is already checked out in worktree at `{path}`. What would you like to do?"
+
+Do NOT attempt to resolve this automatically.
+
+### Step 5: Check Out the Branch
+
+**If the branch exists locally:**
+
+```bash
+git checkout {branch}
+git pull --ff-only || echo "Pull skipped (no upstream or diverged)."
+```
+
+**If the branch only exists on remote:**
+
+```bash
+git checkout -b {branch} origin/{branch}
+```
+
+### Step 6: Confirm Setup
+
+Report back with:
+
+- Branch name and working directory
+- Latest commit: `git log --oneline -1`
+- Check if a plan exists at `plans/{branch}/plan.md` — if so, mention it so the user knows there's prior context
 
 ## Critical Rules
 
-- Do not overwrite uncommitted changes.
-- Do not force checkout.
-- Do not push automatically.
-- Stop on worktree conflicts.
-
-## Checklist
-
-- [ ] Current state inspected
-- [ ] Target branch resolved
-- [ ] Existing branches checked
-- [ ] Worktree conflicts checked
-- [ ] Branch/worktree prepared
-- [ ] Status reported
+- **Stop on worktree conflicts** — never force-checkout or detach other worktrees. Ask the user.
+- **Never force-checkout over uncommitted changes** — if `git status` shows changes, warn the user.
+- **Branch naming convention is `{issue-number}-{slug}`** — lowercase, hyphen-separated, derived from the issue title. Examples: `126-add-import-retry-policy`, `148-allow-custom-page-size-in-the-datatable`.
+- **Always branch from `main`** when creating new branches.
+- **Do not push automatically** — the user decides when to push. Inform them the branch is local-only after creation.

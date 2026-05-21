@@ -1,113 +1,99 @@
 ---
 name: create-pr
-description: Create a pull request from the current branch. Use when the user says "create PR", "open PR", "make pull request", or wants to publish completed branch work for review.
+description: Create a GitHub pull request with the issue number in the title. Use when user says "create PR", "open PR", "make pull request", or after completing a plan implementation.
 ---
 
 # Create PR
 
-Create a pull request using repository conventions, plan artifacts, and
-verification evidence.
+Create a GitHub pull request with consistent title formatting that includes the issue number.
 
 ## Instructions
 
-### Step 1: Inspect Branch State
+### Step 0: Verify Self-Review Has Been Run
 
-1. Get the current branch and upstream.
-2. Check for uncommitted changes.
-3. Identify the default base branch from the remote or repository docs.
-4. Detect related issue numbers from branch name, commits, plan files, or user
-   input.
-5. Read `plans/{branch}/plan.md` and sub-plans when present.
-6. Read recent review artifacts if present.
+Before creating a PR, check that `/review-pr` has been run on this branch:
 
-If there are uncommitted changes, ask whether to commit first, leave them out,
-or stop.
+1. Check if `/review-pr` was run in the current session (the user ran it earlier in this conversation)
+2. If not, warn: *"Self-review has not been run. Run `/review-pr` first to catch issues before PR creation?"*
+3. If the user confirms to skip, proceed — but note "Self-review skipped" in the PR description
+4. If the user ran `/review-pr` and there are unresolved Critical findings, warn: *"/review-pr found N unresolved critical findings. Resolve them before creating a PR, or proceed anyway?"*
 
-### Step 2: Check Pre-PR Quality
+This is advisory, not blocking — the user can always override.
 
-If the repository has a branch-review workflow, check whether it has run. If not,
-recommend it and ask whether to run, skip, or continue.
+### Step 1: Determine Issue Number and Branch
 
-Do not block the user if they explicitly choose to proceed.
+1. Get the current branch: `git branch --show-current`
+2. If the branch name starts with a number (e.g., `50-archive-dynamodb-event-store`), extract it as the issue number.
+3. If no issue number is detected, ask the user for it.
 
-### Step 3: Build Title And Body
+### Step 2: Build PR Title
 
-Follow the repository's PR title convention. If none exists, use:
+**Format: `#{issue-number} {Short description}`** — the issue number MUST be the very first thing in the title. No exceptions.
 
-```text
-{Short imperative description}
-```
+Rules:
+- Issue number comes first, prefixed with `#`
+- Single space after the number — no colon, no dash
+- Description starts with a capital letter
+- No conventional-commit prefixes (`feat:`, `fix:`, `chore:`, etc.)
 
-If an issue is linked, include the issue reference according to the repo's
-convention.
+**Correct examples:**
+- `#50 Archive DynamoDB event store`
+- `#14 Localization infrastructure`
+- `#148 Allow custom page size in the DataTable`
 
-Use this body unless the repo has a better template:
+**Do NOT use these formats:**
+- `#50: Title` — no colon after the issue number
+- `feat: Title (#50)` — no conventional-commit prefix, no issue number at end
+- `fix: resolve something` — missing issue number entirely
+- `#50 implement thing` — must capitalize first word of description
+
+Derive the short description from:
+- The plan file at `plans/{branch-name}/plan.md` (use the feature title)
+- The GitHub issue title: fetch the issue details using the available GitHub tools (owner, repo, issue_number) and extract the title from the result
+- Or ask the user
+
+### Step 3: Build PR Body
+
+Use the plan file to construct the body:
 
 ```markdown
 ## Summary
 
-- ...
-- ...
+- Bullet point summary of what was implemented (2-5 bullets)
 
 ## Issue
 
 Closes #{issue-number}
 
-## Verification
+## Test Plan
 
-- [ ] {command or manual check}
+- [ ] Verification steps or test commands run
 ```
 
-Derive summary and verification from plans, test results, review artifacts, and
-the diff. Do not claim checks passed unless they actually ran.
+If a plan exists, derive the summary from the completed tasks in the Implementation Tasks table.
 
-### Step 4: Confirm External Write If Needed
+### Step 4: Push and Create
 
-Creating a PR writes to the remote hosting service and usually requires pushing
-the branch. If the user explicitly asked to create a PR, that is approval for a
-normal push and PR creation unless repository instructions require a separate
-confirmation.
+1. Push the branch:
 
-Ask before:
+```bash
+git push -u origin HEAD
+```
 
-- pushing with unusual options
-- changing base branch from the detected default
-- creating a draft when not requested
-- adding labels/reviewers/milestones if not obvious
+2. Create the pull request using the available GitHub tools with:
+   - `owner`: repository owner
+   - `repo`: repository name
+   - `title`: `"#{issue-number} {description}"`
+   - `head`: current branch name
+   - `base`: `"main"`
+   - `body`: the PR body from Step 3
 
-### Step 5: Push And Create
+### Step 5: Return the PR URL
 
-Push the current branch normally. Then create the PR with the selected title,
-body, head, and base using available Git hosting tools or CLI.
-
-Never force-push.
-
-### Step 6: Report
-
-Report:
-
-- PR URL
-- title
-- base and head branches
-- whether review was run or skipped
-- verification included in the body
+Display the PR URL to the user when done.
 
 ## Critical Rules
 
-- Do not create a PR from a dirty worktree without asking.
-- Do not invent verification results.
-- Do not force-push.
-- Follow repository title/body conventions when documented.
-- Do not add reviewers, labels, or milestones unless requested or clearly
-  documented.
-
-## Checklist
-
-- [ ] Branch and base identified
-- [ ] Dirty worktree handled
-- [ ] Related issue detected or requested
-- [ ] Plan/review/test artifacts checked
-- [ ] Title and body drafted
-- [ ] Branch pushed normally
-- [ ] PR created
-- [ ] URL reported
+- **Title format is `#{number} {Description}`** -- issue number first, no colon, no prefix, capitalized description. This is non-negotiable.
+- **Comment prefix** -- if adding PR comments, prefix with `**[Claude Code]:**`
+- **Don't force-push** -- use regular `git push`

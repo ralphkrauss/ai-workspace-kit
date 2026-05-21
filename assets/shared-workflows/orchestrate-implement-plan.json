@@ -1,0 +1,46 @@
+{
+  "name": "orchestrate-implement-plan",
+  "description": "approved-plan implementation loop: implementer plus independent review until ready.",
+  "orchestrator_profile": "workflow-orchestrator",
+  "reviewer_profile": "workflow-reviewer",
+  "reviewer_required_for": [
+    "spawn_worker",
+    "send_followup_to_worker",
+    "ask_human",
+    "cancel_worker",
+    "mark_complete",
+    "mark_failed"
+  ],
+  "max_review_iterations": 3,
+  "review_escalation": "ask_human",
+  "triggers": [
+    {
+      "kind": "initial_invocation"
+    },
+    {
+      "kind": "any_worker_finished"
+    },
+    {
+      "kind": "worker_error"
+    },
+    {
+      "kind": "human_replied"
+    }
+  ],
+  "idle_seconds": 900,
+  "compaction": {
+    "max_actions_between": 40
+  },
+  "state_packet": {
+    "recent_events_limit": 30,
+    "worker_summary_chars_max": 3500,
+    "action_history_window": 25,
+    "include_pending_inputs": true,
+    "include_children": true
+  },
+  "role_prompts": {
+    "orchestrator": "You orchestrate the target repository workflow `orchestrate-implement-plan`. Read `.agents/skills/orchestrate-implement-plan/SKILL.md` in the target cwd and follow it as policy. You are a supervisor only: do not edit files directly, do not commit, do not push. Use `implementation` for code changes and `code-review` for independent review in the target cwd. Preserve the approved plan and the target repository rules. Loop implementer/reviewer on routine fixes. Ask Ralph only for true scope/product/public-contract/security/tool-surface/dependency decisions or unsafe dirty-worktree situations. Finish with changed files, validation evidence, reviewer verdict, residual risks, and Open Human Decisions.",
+    "reviewer": "You review proposed orchestration actions for the target repository `orchestrate-implement-plan` workflow. Approve only if actions follow the target cwd `.agents/skills/orchestrate-implement-plan/SKILL.md`: implementer and reviewer profiles are used correctly, supervisor does not edit/commit/push, unrelated dirty files are protected, routine fixes stay with workers, and behavior/scope/public-contract/tool-surface/dependency changes go to Ralph before implementation."
+  },
+  "max_nesting_depth": 1
+}

@@ -1,0 +1,45 @@
+{
+  "name": "orchestrate-create-test-plan",
+  "description": "branch test-plan creation loop: test-plan creator plus reviewer until runbook is ready.",
+  "orchestrator_profile": "workflow-orchestrator",
+  "reviewer_profile": "workflow-reviewer",
+  "reviewer_required_for": [
+    "spawn_worker",
+    "send_followup_to_worker",
+    "ask_human",
+    "mark_complete",
+    "mark_failed"
+  ],
+  "max_review_iterations": 3,
+  "review_escalation": "ask_human",
+  "triggers": [
+    {
+      "kind": "initial_invocation"
+    },
+    {
+      "kind": "any_worker_finished"
+    },
+    {
+      "kind": "worker_error"
+    },
+    {
+      "kind": "human_replied"
+    }
+  ],
+  "idle_seconds": 900,
+  "compaction": {
+    "max_actions_between": 35
+  },
+  "state_packet": {
+    "recent_events_limit": 30,
+    "worker_summary_chars_max": 3500,
+    "action_history_window": 25,
+    "include_pending_inputs": true,
+    "include_children": true
+  },
+  "role_prompts": {
+    "orchestrator": "You orchestrate the target repository workflow `orchestrate-create-test-plan`. Read `.agents/skills/orchestrate-create-test-plan/SKILL.md` in the target cwd and follow it as policy. You are a supervisor only: do not edit files directly, do not commit, do not push. Use `plan-creator` as test-plan creator and `plan-reviewer` as reviewer in the target cwd. The artifact is `plans/{branch}/test-plan.md`. Ensure workers derive scope from plan files and branch diff, verify data/schema accuracy, and loop until the test plan is usable for `/run-test-plan`. Escalate only true test scope/staging/provider/capability decisions.",
+    "reviewer": "You review proposed orchestration actions for the target repository `orchestrate-create-test-plan` workflow. Approve only if actions follow the target cwd `.agents/skills/orchestrate-create-test-plan/SKILL.md`: correct creator/reviewer profiles, no supervisor file edits/commits/pushes, branch-scoped test-plan artifact, reviewer-answerable questions go to reviewer first, and material coverage/access/provider-call changes go to Ralph."
+  },
+  "max_nesting_depth": 1
+}

@@ -1,85 +1,134 @@
 ---
 name: create-mcp
-description: Add or update MCP server configuration safely. Use when the user says "add MCP server", "new MCP server", "create MCP", "add tool to MCP", or wants tool access wired into AI clients.
+description: Add a new MCP server to all AI tool configs. Use when user says "add MCP server", "new MCP server", "create MCP", "add tool to MCP", or wants to register a new MCP server across Claude Code, Codex, Cursor, and OpenCode.
 ---
 
-# Create MCP
+# Add MCP Server
 
-Add an MCP server to the repository's selected AI tool configs while keeping
-secrets out of the repo and documenting guardrails.
+Add a new MCP server to all AI tool config files, keeping the cross-tool inventory in sync.
+
+If the project documents its own MCP architecture and credential conventions, read that documentation first.
 
 ## Instructions
 
-### Step 1: Inventory Existing MCP Setup
+### Step 1: Gather Server Details
 
-Look for:
+Determine the following from the user's request or by asking (one round max):
 
-- `.mcp.json`
-- `.cursor/mcp.json`
-- `.codex/config.toml`
-- `opencode.json`
-- docs mentioning MCP
-- helper scripts for secrets or launch wrappers
+1. **Name** -- kebab-case server identifier (e.g., `my-tool-local`, `my-tool-stg`)
+2. **Tier** -- 1 (third-party image), 2 (custom CLI wrapper, if the project ships one), or custom (Node.js/uv script)
+3. **Environment** -- Local or Staging (staging names should include a tenant or environment identifier)
+4. **Transport** -- stdio (Docker/Node/uv command) or HTTP (url + headers)
+5. **Access mode** -- read-only or read-write
+6. **Docker image or command** -- what runs the server
+7. **Environment variables** -- which env vars are needed, which are secrets
+8. **Guardrails** (Tier 2 only) -- allowed patterns, blocked patterns, strip args, prepend args
 
-### Step 2: Gather Server Details
+### Step 2: Add to `.mcp.json` (Claude Code -- the reference config)
 
-Ask or infer:
+This is the authoritative definition. All other configs are ports of this.
 
-- server name
-- purpose
-- transport: stdio or HTTP
-- command/image/url
-- required environment variables
-- which variables are secrets
-- access level: read-only or read-write
-- guardrails: allowed commands, blocked commands, approval mode
-- target AI clients
+Add the server entry under `mcpServers`. Include a `_comment` field describing tier, environment, access mode, and prerequisites.
 
-### Step 3: Choose Secret Strategy
+Key conventions:
+- Use `${VAR:-default}` for env var substitution with defaults
+- Use `${VAR:-}` (empty default) for credential-driven activation
+- Docker servers use `"type": "stdio"`, `"command": "docker"`, `"args": ["run", "-i", "--rm", ...]`
+- Pass env vars to Docker with `-e VAR_NAME` in args + matching `env` block
+- Shared repo configs should use `node scripts/run-npx-mcp.mjs ...` instead of raw `npx ...` for stdio servers launched via npm shims
+- HTTP servers use `"type": "stdio"` with `node scripts/run-npx-mcp.mjs -y mcp-remote ...` proxy (not direct HTTP)
 
-Do not put secrets in repo config. Use:
+See `references/config-formats.md` for the exact template.
 
-- environment variable references
-- user-level secret files
-- documented local setup
-- existing secret bridge/wrapper if the repo has one
+### Step 3: Add to `.codex/config.toml` (Codex)
 
-### Step 4: Update Configs
+Translate the Claude config to TOML format:
+- `command` and `args` are TOML key/value pairs
+- `env` becomes `[mcp_servers.<name>.env]` table
+- JSON arrays in env values need careful TOML string escaping
+- HTTP servers use `url` + `http_headers` (no `npx mcp-remote` wrapper)
+- Secret-bearing stdio servers should use `scripts/mcp-secret-bridge.mjs` so repo config can map canonical user-level secret names into the child env names expected by the server
+- If the child command would be raw `npx`, invoke `node scripts/run-npx-mcp.mjs ...` instead so native Windows works from the shared config
+- Add `[mcp_servers.<name>.tools.<tool>]` sections with `approval_mode = "approve"` if tools need gating
 
-Update only selected tool configs. Keep entries consistent across tools, but do
-not invent unsupported formats.
+Only keep static non-secret values in repo `env` tables. The bridge handles secret remapping and any user-level secrets file the project uses as fallback.
 
-If an existing MCP setup differs, merge with it and ask before replacing.
+See `references/config-formats.md` for the exact template.
 
-### Step 5: Document
+### Step 4: Add to `.cursor/mcp.json` (Cursor)
 
-Update or create MCP notes with:
+Translate the Claude config to Cursor format:
+- Same JSON structure as Claude but no `type` field, no `_comment`
+- Secret-bearing stdio servers should use `scripts/mcp-secret-bridge.mjs`
+- If the child command would be raw `npx`, invoke `node scripts/run-npx-mcp.mjs ...` instead
+- Only keep static non-secret values in the Cursor `env` block
+- Do not reintroduce repo-local `.cursor/mcp.env`
 
-- server inventory
-- prerequisites
-- secret names
-- access level
-- safety guardrails
-- health check
+See `references/config-formats.md` for the exact template.
 
-### Step 6: Verify
+### Step 5: Add to `opencode.json` (OpenCode)
 
-Validate JSON/TOML syntax where applicable. Do not start external services or
-write to remote systems unless approved.
+Translate the Claude config to OpenCode format:
+- `command` is a single array: `["docker", "run", "-i", "--rm", ...]` (command + args combined)
+- `environment` replaces `env`
+- `type: "local"` for stdio, `type: "remote"` for HTTP
+- HTTP servers use `url` + `headers` directly (no proxy)
+- Secret-bearing stdio servers should use `scripts/mcp-secret-bridge.mjs`
+- If the child command would be raw `npx`, invoke `node scripts/run-npx-mcp.mjs ...` instead
+- Only keep static non-secret values in the OpenCode `environment` block
+
+See `references/config-formats.md` for the exact template.
+
+### Step 6: Update Documentation
+
+If the project maintains an MCP inventory doc, update it:
+
+1. **Server Inventory table** -- add a row with server name, tier, environment, access mode, prerequisites, and description
+2. **Cross-Tool Server Mapping table** -- add a row showing which tools have the server (use checkmark or `--`)
+3. **Environment Variables Reference table** -- add rows for any new env vars with description and which server uses them
+
+### Step 7: Update Credential Examples
+
+If the server requires credentials:
+
+1. Document required env vars per tool config in whatever the project's MCP docs are
+2. **Canonical bootstrap template** -- if the project uses a shared secret-bootstrap script, add the canonical variable there
+3. **OpenCode / Cursor / Codex bridge** -- ensure the canonical variable is covered by the bridge profile and any config examples when relevant
+
+### Step 8: Verify
+
+- Confirm server name follows the project's naming conventions (e.g., includes a tenant/environment identifier for staging)
+- Confirm all 4 config files are syntactically valid (no trailing commas in JSON, valid TOML)
+- Confirm the server entry is consistent across all configs (same Docker args, same env vars)
+- For Tier 2 servers, confirm guardrail mode is correct (open, allowlist-only, or blocklist-only -- never both)
 
 ## Critical Rules
 
-- Never commit secrets.
-- Prefer read-only access for shared or remote environments.
-- Add guardrails for tools that can mutate state.
-- Ask before changing existing MCP config.
-- Ask before starting servers or testing write-capable tools.
+- `.mcp.json` is the **reference config** -- define the server there first, then port to other formats
+- **Never use both allowed and blocked patterns** on the same Tier 2 server -- pick one mode
+- **Staging servers include a tenant/environment ID** in the name (e.g., `stg-tenant-region`, not bare `staging`)
+- **Canonical secret names live outside the repo** -- preserve user-level canonical names rather than rewriting them per server
+- **Cursor secret-bearing stdio servers should use the bridge** -- do not add `.cursor/mcp.env` back or rely on launch-env-only secret wiring
+- **OpenCode secret-bearing stdio servers should use the bridge** -- do not add `.opencode/secrets/*` requirements back or rely on launch-env-only secret wiring
+- **Codex secret-bearing stdio servers should use the bridge** -- do not reintroduce repo-specific secret tables in `~/.codex/config.toml`
+- **Docker Desktop networking**: use `host.docker.internal` (not `localhost`) for host ports accessed from Docker containers on macOS/Windows
 
 ## Checklist
 
-- [ ] Existing MCP config inventoried
-- [ ] Server details gathered
-- [ ] Secret strategy documented
-- [ ] Selected configs updated
-- [ ] Docs updated
-- [ ] Syntax validated
+- [ ] Server added to `.mcp.json` with `_comment`, correct transport, env vars
+- [ ] Server added to `.codex/config.toml` with TOML-translated config
+- [ ] Server added to `.cursor/mcp.json` (or documented why skipped)
+- [ ] Server added to `opencode.json` with OpenCode-format translation
+- [ ] Project's secret-bootstrap script updated (if a new canonical secret is needed)
+- [ ] Project's MCP inventory doc updated (if maintained)
+- [ ] Cross-Tool Server Mapping updated
+- [ ] Environment Variables Reference updated (if new vars)
+- [ ] Credential examples updated in all tool sections
+
+## Reference
+
+- `references/config-formats.md` -- per-tool config templates
+- `.mcp.json` -- Claude Code reference config (authoritative)
+- `.codex/config.toml` -- Codex config
+- `.cursor/mcp.json` -- Cursor config
+- `opencode.json` -- OpenCode config

@@ -1,15 +1,18 @@
 ---
 name: orchestrate-implement-plan
-description: Orchestrate implementation of an approved repository plan with a fresh implementer run, a fresh reviewer run, iterative feedback follow-up, and commit/push after both roles align.
+description: Orchestrate implementation of an approved repository plan with implementer and reviewer workers through agent-orchestrator. Use when user says "orchestrate implement plan", "agent implementation loop", or wants worker-assisted implementation.
 ---
 
 # Orchestrate Implement Plan
 
 Coordinate implementation of an approved repository-native plan. The implementer
 owns code changes and should use the repository `implement-plan` workflow or
-skill when available. The reviewer independently reviews the implementation
-against the approved plan. The supervisor coordinates the loop through worker
-runs and does not directly edit source, commit, or push.
+skill when available. The reviewer independently audits the resulting diff,
+with the approved plan as context. The supervisor coordinates the loop through
+worker runs and does not directly edit source, commit, or push.
+
+Read your repository's agent-orchestrator setup docs (MCP server config,
+profiles manifest, package diagnostics) before starting.
 
 ## Route And Profile Selection
 
@@ -58,6 +61,30 @@ When a finding exposes risk in an approved behavior, first look for a fix that
 preserves the behavior. If the available fix would materially change behavior or
 tooling, pause and ask the human with options.
 
+## Reviewer Prompt Anti-Patterns
+
+Reviewer workers are capable agents with access to the repository's review
+skills and rules. The supervisor's reviewer prompt should be a slim handoff:
+artifact paths, upstream worker output when useful, the diff or scope to review,
+and the relevant repository workflow to use.
+
+Avoid these reviewer-prompt failure modes:
+
+- **Plan-compliance-only framing:** do not ask only whether the implementation
+  satisfies the plan. Ask for an independent repository review with the plan as
+  context.
+- **Dimension lists:** do not recreate the review rubric in the prompt. Point to
+  `/review`, `/review-pr`, or the relevant repository skill instead.
+- **Hint laundering:** do not summarize implementer claims as facts. Pass the
+  implementer output verbatim when it matters.
+- **Positive framing:** do not state intended behavior as something to confirm.
+  Let the reviewer derive behavior from the diff, plan, and repository rules.
+
+If the supervisor notices a genuinely task-specific concern that is not already
+in the plan, diff, upstream worker output, or repository rules, surface it to the
+human as an **Open Human Decision**. Do not smuggle it into the reviewer prompt
+as a checklist item.
+
 ## Workflow
 
 1. **Preflight the workspace.** Confirm the target workspace cwd from supervisor
@@ -90,21 +117,15 @@ tooling, pause and ask the human with options.
    clear idle/fatal evidence, or a deliberate stop/restart recovery path.
 4. **Start the reviewer after implementation.** Start a new worker run via
    `start_run` using the `code-review` profile alias, the configured
-   `profiles_file`, and the target workspace cwd. Give the reviewer fresh
-   context consisting of the approved plan location, current branch, repository
-   instructions, and the current working tree diff. Ask it to:
-   - review the code changes against the approved plan and acceptance criteria;
-   - inspect relevant tests, docs, contracts, and affected call sites;
-   - identify correctness, compatibility, error handling, persistence,
-     cancellation, observability, security, and test coverage issues where
-     relevant;
-   - classify each blocking finding as either a routine fix that preserves the
-     approved behavior or a human-approval-required behavior/scope/tooling
-     change;
-   - propose behavior-preserving fixes before recommending behavior removal or
-     permission/tool-surface changes;
-   - separate blocking findings from non-blocking suggestions and test gaps;
-   - say explicitly when the implementation is ready.
+   `profiles_file`, and the target workspace cwd. Give the reviewer only the
+   approved plan path, current branch, repository instructions, implementer's
+   final output, and current working tree diff or diff command. Ask it to use
+   the repository `/review` workflow or skill if available, with the plan and
+   implementer output as context rather than conclusions. The reviewer should
+   report blocking findings first, then non-blocking suggestions and test gaps,
+   and say explicitly whether the implementation is ready. Do not add a custom
+   verification checklist or supervisor-authored summary of what the
+   implementation is supposed to have preserved.
 5. **Iterate with existing sessions.** If the reviewer has blocking or material
    feedback, classify it first. Send routine fixes to the existing implementer
    session with `send_followup`. If the feedback would change approved behavior,
@@ -114,7 +135,9 @@ tooling, pause and ask the human with options.
    that change. For routine fixes, ask the implementer to fix the findings,
    update plan evidence, rerun the relevant verification, and report what
    changed. Then send the implementer's response back to the existing reviewer
-   session with `send_followup` for re-review. Continue until:
+   session with `send_followup` for re-review. Pass the implementer response
+   verbatim and ask for a fresh judgment on the updated diff, not confirmation
+   of the supervisor's expectations. Continue until:
    - the reviewer says there are no blocking findings and the implementation is
      ready; and
    - the implementer agrees all review feedback has been addressed or explicitly
@@ -160,22 +183,20 @@ tooling, pause and ask the human with options.
   orchestration workflow, and permission/tool surfaces. If a safe fix appears to
   require changing any of those, stop and report an Open Human Decision with
   options. Do not commit or push yet."
-- Initial reviewer: "Review the current working tree diff against the approved
-  plan for this branch. Use the plan and repository context as your source of
-  truth. Report blocking findings first, then non-blocking suggestions and test
-  gaps. For each blocking finding, say whether it is a routine
-  behavior-preserving fix or requires human approval because it changes scope,
-  behavior, public contracts, workflow, permission/tool surfaces, or accepted
-  risk. Say explicitly whether the implementation is ready."
+- Initial reviewer: "Use the repository `/review` workflow or skill to review
+  the current working tree diff. Inputs: approved plan path, current branch, and
+  the implementer's final output. Treat those inputs as context, not as
+  conclusions. Report blocking findings first, then non-blocking suggestions and
+  test gaps. Say explicitly whether the implementation is ready."
 - Reviewer feedback to implementer: "Address the reviewer feedback below in
   this existing implementation session. Keep changes scoped and preserve
   approved behavior, public contracts, workflow, and permission/tool surfaces
   unless the human explicitly approved a change. Update plan evidence, rerun
   relevant verification, and report what changed plus any remaining risks."
-- Implementer response to reviewer: "Re-review the updated implementation in
-  this existing review session. Focus on the prior findings, any new diff, and
-  whether the implementation now satisfies the approved plan. Say explicitly
-  whether it is ready."
+- Implementer response to reviewer: "Re-review the updated diff in this
+  existing review session. Inputs: prior reviewer findings and the implementer's
+  response below. Treat the response as claims to verify. Report remaining
+  blockers, new blockers, non-blocking suggestions, and whether it is ready."
 - Human decision summary: "The implementation is otherwise ready. Before commit
   and push, here are the remaining human decisions needed to finish cleanly:
   [numbered list with options and consequences]. Please answer each item or

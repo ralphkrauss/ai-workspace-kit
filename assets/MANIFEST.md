@@ -45,11 +45,33 @@ manifest defining the referenced profile aliases (for example `plan-creator`,
 |---|---|
 | `orchestrate-create-plan` | Supervise a plan-creator + plan-reviewer loop on a GitHub issue and push the plan |
 | `orchestrate-implement-plan` | Supervise an implementer + code-reviewer loop against an approved plan |
-| `orchestrate-resolve-pr-comments` | Supervise PR-comment triage, resolution-map review, implementation, code review, push, and GitHub replies |
+| `orchestrate-create-test-plan` | Supervise a test-plan creator + reviewer loop producing the runtime test runbook |
+| `orchestrate-review` | Supervise a multi-perspective post-implementation review (raw `/review` plus CodeRabbit MCP) with per-iteration commits |
+| `orchestrate-resolve-pr-comments` | Supervise PR-comment and CI/check triage, resolution-map review, implementation, code review, push, and GitHub replies |
 
 Orchestration skills reference the matching repository workflow skills
-(`create-plan`, `implement-plan`, `resolve-pr-comments`) so install those first
-when adopting the supervisor flow.
+(`create-plan`, `implement-plan`, `create-test-plan`, `review`, `resolve-pr-comments`)
+so install those first when adopting the supervisor flow.
+
+## Shared Agent Orchestrator Workflows
+
+Workflow JSON assets live under `assets/shared-workflows/`. These are runtime
+definitions for the `@ralphkrauss/agent-orchestrator` orchestration engine and
+pair with the matching `assets/shared-skills/orchestrate-*` supervisor skills.
+
+Install them into a target repository at `.agent-orchestrator/workflows/` for
+committed project-owned behavior, or into
+`~/.config/agent-orchestrator/workflows/` for user-level defaults. The
+agent-orchestrator resolver checks project workflows first, then user workflows;
+same-name project workflows intentionally override user defaults.
+
+| Workflow | Paired Skill |
+|---|---|
+| `orchestrate-create-plan` | `orchestrate-create-plan` |
+| `orchestrate-create-test-plan` | `orchestrate-create-test-plan` |
+| `orchestrate-implement-plan` | `orchestrate-implement-plan` |
+| `orchestrate-resolve-pr-comments` | `orchestrate-resolve-pr-comments` |
+| `orchestrate-review` | `orchestrate-review` |
 
 ## Shared Agents
 
