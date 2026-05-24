@@ -14,10 +14,20 @@ Structured workflow for creating GitHub issues. Gathers context from the codebas
 3. **NO DUPLICATE ISSUES**: Search for existing issues before creating
 4. **LINK RELATED WORK**: Reference related issues, PRs, and code locations
 5. **COMMENT PREFIX**: If posting follow-up comments, start with `**[Claude Code]:**`
+6. **BRAINSTORM ROUGH IDEAS FIRST**: If the user has a rough idea rather than an issue-ready request, use `brainstorm-issue` before drafting the GitHub issue
 
 ---
 
 ## Instructions
+
+### Step 0: Decide Whether To Brainstorm First
+
+If the user asks to explore an idea, think through a feature request, or create
+an issue from a vague concept, run `brainstorm-issue` before continuing. Use
+the approved brainstorm brief as the source for this skill.
+
+If the user already provides a clear issue body, bug report, acceptance
+criteria, or explicit implementation task, continue directly to Step 1.
 
 ### Step 1: Determine Issue Type
 
@@ -144,6 +154,7 @@ Want me to create a branch and start working on this? (Y/N)
 ## Checklist
 
 - [ ] Issue type determined
+- [ ] Brainstorm completed first when the request was a rough idea
 - [ ] Duplicate search completed
 - [ ] Codebase context gathered
 - [ ] Draft reviewed by user

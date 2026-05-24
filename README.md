@@ -90,6 +90,7 @@ write files until you approve the installation plan.
 - `create-rule`
 - `commit`
 - `create-pr`
+- `brainstorm-issue`
 - `create-issue`
 - `shape-issue`
 - `await-pr-checks`

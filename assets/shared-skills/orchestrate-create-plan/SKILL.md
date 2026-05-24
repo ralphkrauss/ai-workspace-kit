@@ -158,11 +158,14 @@ prompt as a checklist item.
    implementation detail.
 9. **Commit and push the plan through the plan creator.** Repository-native plan
    files and plan index files created by the create-plan workflow are normal
-   workflow artifacts. After the reviewer and plan creator agree the plan is
-   ready, ask the plan creator to commit and push only those plan workflow files
-   unless the human says otherwise. The supervisor must not commit or push
-   directly. The plan creator should report the commit SHA, pushed branch, and
-   exact files included.
+   workflow artifacts. Human approval to run this planning workflow includes
+   approval to publish the final plan artifact. After the reviewer and plan
+   creator agree the plan is ready, instruct the plan creator to commit and push
+   only those plan workflow files without asking the human for a second
+   confirmation, unless the human explicitly said not to publish the plan. The
+   supervisor must not commit or push directly. The plan creator should report
+   the commit SHA, pushed branch, exact files included, and GitHub URL for the
+   online plan.
 10. **Finish with an online handoff.** Give the human the GitHub URL for the
    pushed online plan, plus a concise summary of the plan, key decisions,
    assumptions, risks, and any human scope decisions made. Do not directly edit
@@ -184,6 +187,8 @@ Use short, role-specific follow-ups during the loop:
   implementation, approved behavior, permission/tool surfaces, public contracts,
   or product requirements and the reviewer could not answer them."
 - To the plan creator after approval: "The reviewer says the plan is ready.
+  Ralph's approval to run this planning workflow includes approval to publish
+  the final plan artifact, so do not ask for separate commit/push permission.
   Commit and push only the create-plan workflow artifacts for this plan and the
   branch index. Do not include source changes. Report the commit SHA, pushed
   branch, files committed, and the GitHub URL for the plan."

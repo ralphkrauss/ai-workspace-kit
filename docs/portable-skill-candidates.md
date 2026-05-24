@@ -13,6 +13,7 @@ commands with target-repository discovery:
 | `implement-plan` | Generic plan execution and evidence tracking |
 | `commit` | Generic scoped git commits |
 | `create-pr` | Generic PR creation from branch artifacts |
+| `brainstorm-issue` | Generic idea exploration before issue creation |
 | `create-issue` | Generic issue drafting with context |
 | `resolve-pr-comments` | Generic PR feedback triage and resolution maps |
 | `resolve-issue-comments` | Generic issue feedback triage and resolution maps |

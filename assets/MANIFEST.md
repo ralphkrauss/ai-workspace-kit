@@ -10,6 +10,7 @@ For the copy-paste installer prompt, see `PROMPT.md` at the repository root.
 | Skill | Purpose |
 |---|---|
 | `await-pr-checks` | Monitor PR checks and diagnose failures |
+| `brainstorm-issue` | Explore rough ideas before GitHub issue creation |
 | `commit` | Create scoped git commits |
 | `create-agent` | Capture reusable agent definitions |
 | `create-issue` | Draft and create structured issues |
