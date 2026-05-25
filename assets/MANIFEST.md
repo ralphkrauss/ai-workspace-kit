@@ -25,6 +25,7 @@ For the copy-paste installer prompt, see `PROMPT.md` at the repository root.
 | `resolve-conflicts` | Resolve git conflicts safely |
 | `resolve-issue-comments` | Triage and resolve issue feedback |
 | `resolve-pr-comments` | Triage and resolve PR feedback |
+| `resolve-review-findings` | Validate and fix session review findings |
 | `review` | Review uncommitted changes |
 | `review-pr` | Review full branch diff |
 | `run-test-plan` | Execute manual test runbooks |

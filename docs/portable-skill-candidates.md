@@ -20,6 +20,7 @@ commands with target-repository discovery:
 | `await-pr-checks` | Generic CI monitoring and failure triage |
 | `review` | Generic uncommitted diff review |
 | `review-pr` | Generic branch review before PR |
+| `resolve-review-findings` | Generic validation and fix loop after session review |
 | `create-test-plan` | Generic manual test runbook creation |
 | `run-test-plan` | Generic human-plus-agent test session |
 | `resolve-conflicts` | Generic git conflict resolution |

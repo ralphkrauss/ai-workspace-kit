@@ -98,6 +98,7 @@ write files until you approve the installation plan.
 - `review-pr`
 - `resolve-conflicts`
 - `resolve-issue-comments`
+- `resolve-review-findings`
 - `setup-worktree`
 - `load-context`
 - `update-context`
@@ -121,6 +122,11 @@ When improving the kit:
 
 - Keep shared skills under `assets/shared-skills/`.
 - Keep shared Agent Orchestrator workflow JSON under `assets/shared-workflows/`.
+- Keep kit-only maintenance skills under `.agents/skills/`; run
+  `just ai-sync` after changing them and `just ai-sync-check` to verify the
+  generated `.claude/` projection.
+- Optional repository-local hooks live under `.githooks/`; inspect with
+  `just ai-hooks-status` and only enable them with explicit approval.
 - Keep examples generic.
 - Run `just check-public` before publishing changes.
 - For local/private source terms, run
